@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/utrip
+    username: utrip
+    password: ***REMOVED***
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        globally_quoted_identifiers: true
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+
+  session:
+    store-type: jdbc
+    jdbc:
+      schema: classpath:org/springframework/session/jdbc/schema-postgresql.sql
+      initialize-schema: always
+      table-name: SPRING_SESSION
+
+server:
+  forward-headers-strategy: framework

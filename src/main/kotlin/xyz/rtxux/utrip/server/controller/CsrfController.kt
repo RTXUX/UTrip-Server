@@ -9,5 +9,5 @@ import springfox.documentation.annotations.ApiIgnore
 class CsrfController {
     @ApiIgnore
     @GetMapping("/csrf")
-    fun csrf(token: CsrfToken): CsrfToken = token
+    fun csrf(token: CsrfToken?): CsrfToken? = token
 }

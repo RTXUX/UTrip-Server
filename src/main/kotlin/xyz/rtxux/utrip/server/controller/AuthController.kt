@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import xyz.rtxux.utrip.server.model.dto.LoginDTO
+import xyz.rtxux.utrip.server.exception.AppException
 import xyz.rtxux.utrip.server.model.dto.RegisterDTO
 import xyz.rtxux.utrip.server.model.vo.ApiResponseVO
 import xyz.rtxux.utrip.server.model.vo.LoginVO
@@ -20,9 +20,9 @@ import xyz.rtxux.utrip.server.service.impl.MyUserDetails
 class AuthController @Autowired constructor(
         private val userService: UserService
 ) {
-    @ApiOperation("登录")
-    @PostMapping("/login")
-    fun login(@RequestBody loginDTO: LoginDTO): ApiResponseVO<LoginVO>? = null
+//    @ApiOperation("登录")
+//    @PostMapping("/login")
+//    fun login(@RequestBody loginDTO: LoginDTO): ApiResponseVO<LoginVO>? = null
 
     @ApiOperation("注册")
     @PostMapping("/register")
@@ -39,7 +39,7 @@ class AuthController @Autowired constructor(
     @GetMapping("/validate")
     fun validate(@AuthenticationPrincipal user: MyUserDetails?): ApiResponseVO<LoginVO> {
         if (user == null) {
-            return ApiResponseVO(1001, "Not authenticated")
+            throw AppException(401, 1001, "Not Authenticated")
         }
         return ApiResponseVO(0, "Success", LoginVO(user.userId, user.username))
     }

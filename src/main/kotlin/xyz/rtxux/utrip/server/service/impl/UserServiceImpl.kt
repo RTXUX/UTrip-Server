@@ -19,7 +19,7 @@ class UserServiceImpl @Autowired constructor(
     @Transactional
     override fun register(registerDTO: RegisterDTO): RegisterVO {
         if (userRepsitory.findByUsername(registerDTO.username).isPresent) {
-            throw AppException(1001, "用户已存在")
+            throw AppException(400, 1001, "用户已存在")
         }
         val user = User(
                 username = registerDTO.username,

@@ -1,7 +1,8 @@
 package xyz.rtxux.utrip.server.exception
 
 class AppException(
+        val httpCode: Int,
         val code: Int,
-        override val message: String? = null,
+        val friendlyMessage: String? = null,
         override val cause: Throwable? = null
-) : RuntimeException(message, cause)
+) : RuntimeException(friendlyMessage, cause)

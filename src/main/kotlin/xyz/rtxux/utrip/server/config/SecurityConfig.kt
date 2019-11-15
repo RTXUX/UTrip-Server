@@ -38,6 +38,7 @@ class SecurityConfig @Autowired constructor(
         }
         http?.authorizeRequests {
             it.antMatchers("/auth/**").permitAll()
+            it.antMatchers("/image/postupload").permitAll()
             it.anyRequest().authenticated()
         }
         http?.formLogin()?.apply {

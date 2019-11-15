@@ -8,6 +8,7 @@ import xyz.rtxux.utrip.server.model.po.SPoint
 
 @Repository
 interface SPointRepository : JpaRepository<SPoint, Int> {
+    @Suppress("SyntaxError")
     @Query(value = "select p from SPoint p where p.associatedTrack is null and within(p.location, :filter) = true")
     fun findAllStandalonePointAround(filter: Geometry): List<SPoint>
 }

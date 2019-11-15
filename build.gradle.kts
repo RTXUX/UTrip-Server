@@ -44,6 +44,7 @@ dependencies {
         this.exclude("com.alibaba", "jconsole")
         this.exclude("com.alibaba", "tools")
     }
+    implementation("com.qiniu:qiniu-java-sdk:7.2.27")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

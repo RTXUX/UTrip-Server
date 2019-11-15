@@ -29,3 +29,9 @@ spring:
 
 server:
   forward-headers-strategy: framework
+
+qiniu:
+  domain: ***REMOVED***
+  bucket: ***REMOVED***
+  accessKey: ***REMOVED***
+  secretKey: ***REMOVED***

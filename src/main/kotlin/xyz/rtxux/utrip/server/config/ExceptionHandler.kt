@@ -15,6 +15,7 @@ class ExceptionHandler @Autowired constructor(
 ) {
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ApiResponseVO<String>> {
+        e.printStackTrace()
         if (e is AppException) {
             return ResponseEntity.status(e.httpCode).body(ApiResponseVO(e.code, e.friendlyMessage, e.cause?.message))
         }

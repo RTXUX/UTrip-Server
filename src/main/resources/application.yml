@@ -9,12 +9,15 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
+        format-sql: true
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
         jdbc:
           lob:
             non_contextual_creation: true
         globally_quoted_identifiers: true
-    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisDialect
     open-in-view: true
+    show-sql: true
 
   session:
     store-type: jdbc
@@ -22,6 +25,7 @@ spring:
       schema: classpath:org/springframework/session/jdbc/schema-postgresql.sql
       initialize-schema: always
       table-name: SPRING_SESSION
+    timeout: 86400
 
 server:
   forward-headers-strategy: framework

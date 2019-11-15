@@ -33,5 +33,7 @@ data class User(
         var tracks: List<Track>? = null,
         @NotBlank
         @Column(nullable = false)
-        var gender: String? = null
+        var gender: String? = null,
+        @OneToMany(mappedBy = "user")
+        var images: List<Image>? = null
 )

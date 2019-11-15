@@ -20,5 +20,8 @@ data class Image(
         var finished: Boolean? = null,
         @NotNull
         @Column(nullable = false)
-        var timestamp: Instant? = null
+        var timestamp: Instant? = null,
+        @NotNull
+        @ManyToOne(fetch = FetchType.EAGER, optional = false)
+        var user: User? = null
 )

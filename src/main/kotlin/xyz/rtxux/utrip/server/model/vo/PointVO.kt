@@ -9,7 +9,7 @@ data class PointVO(
         val location: LocationBean,
         val userId: Int,
         val timestamp: Long,
-        val associatedTrack: Int,
+        val associatedTrack: Int? = null,
         val images: List<Int>,
         val like: Int
 )

@@ -4,23 +4,44 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import springfox.documentation.annotations.ApiIgnore
+import xyz.rtxux.utrip.server.exception.AppException
 import xyz.rtxux.utrip.server.model.dto.LocationBean
 import xyz.rtxux.utrip.server.model.dto.PointDTO
 import xyz.rtxux.utrip.server.model.vo.ApiResponseVO
 import xyz.rtxux.utrip.server.model.vo.PointVO
+import xyz.rtxux.utrip.server.repository.UserRepsitory
+import xyz.rtxux.utrip.server.service.SPointService
+import xyz.rtxux.utrip.server.service.impl.MyUserDetails
 
 
 @RestController
 @RequestMapping("/point")
 @Api(tags = arrayOf("点管理"))
 class SPointController @Autowired constructor(
-
+        private val sPointService: SPointService,
+        private val userRepsitory: UserRepsitory
 ) {
 
     @PostMapping("")
     @ApiOperation("创建新点")
-    fun newSPoint(@RequestBody pointDTO: PointDTO): ApiResponseVO<PointVO>? = null
+    fun newSPoint(@RequestBody pointDTO: PointDTO, @ApiIgnore @AuthenticationPrincipal userDetails: MyUserDetails): ApiResponseVO<PointVO> {
+        val user = userRepsitory.findById(userDetails.userId).orElseThrow { AppException(401, 1002, "用户不存在") }
+        val sPoint = sPointService.saveSPoint(pointDTO, user)
+        return ApiResponseVO(0, "Success", PointVO(
+                pointId = sPoint.id!!,
+                name = sPoint.name!!,
+                description = sPoint.description!!,
+                location = LocationBean("WGS-84", sPoint.location!!.y, sPoint.location!!.x),
+                userId = sPoint.user!!.id!!,
+                timestamp = sPoint.timestamp!!.toEpochMilli(),
+                like = sPoint.like!!,
+                images = sPoint.images!!.map { it.id!! },
+                associatedTrack = sPoint.associatedTrack?.id
+        ))
+    }
 
     @GetMapping("/{id}")
     @ApiOperation("获取点信息")
@@ -32,7 +53,21 @@ class SPointController @Autowired constructor(
 
     @GetMapping("/around")
     @ApiOperation("获取附近点")
-    fun getSPointAround(@RequestBody location: LocationBean): ApiResponseVO<List<PointVO>>? = null
+    fun getSPointAround(@RequestBody location: LocationBean): ApiResponseVO<List<PointVO>> {
+        return ApiResponseVO(0, "Success", sPointService.findAllStandaloneSPointAround(location, 1.0).map {
+            PointVO(
+                    pointId = it.id!!,
+                    name = it.name!!,
+                    description = it.description!!,
+                    location = LocationBean("WGS-84", it.location!!.y, it.location!!.x),
+                    userId = it.user!!.id!!,
+                    timestamp = it.timestamp!!.toEpochMilli(),
+                    like = it.like!!,
+                    images = it.images!!.map { it.id!! },
+                    associatedTrack = null
+            )
+        })
+    }
 
     @PostMapping("/{id}")
     @ApiOperation("修改点信息")

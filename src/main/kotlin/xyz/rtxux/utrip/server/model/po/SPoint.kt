@@ -30,7 +30,8 @@ data class SPoint(
         @Column(nullable = false)
         var timestamp: Instant? = null,
         @NotNull
-        @Column(nullable = false)
+        @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+        //@Type(type = "org.hibernate.spatial.GeometryType")
         var location: Point? = null,
         @ManyToOne(fetch = FetchType.EAGER)
         var associatedTrack: Track? = null,

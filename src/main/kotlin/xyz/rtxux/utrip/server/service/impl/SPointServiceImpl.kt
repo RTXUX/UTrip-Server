@@ -59,6 +59,15 @@ class SPointServiceImpl @Autowired constructor(
                 timestamp = Instant.now()
         )
         val savedSPoint = sPointRepository.save(sPoint)
+        images.forEach {
+            it.point = savedSPoint
+        }
+        imageRepository.saveAll(images)
         return savedSPoint
+    }
+
+    @Transactional(readOnly = true)
+    override fun findPoint(pointId: Int): SPoint {
+        return sPointRepository.findById(pointId).orElseThrow { AppException(404, 2003, "未找到点") }
     }
 }

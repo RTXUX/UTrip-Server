@@ -45,7 +45,20 @@ class SPointController @Autowired constructor(
 
     @GetMapping("/{id}")
     @ApiOperation("获取点信息")
-    fun getSPointInfo(@ApiParam("点ID", example = "1", required = true) @PathVariable("id") pointId: Int): ApiResponseVO<PointVO>? = null
+    fun getSPointInfo(@ApiParam("点ID", example = "1", required = true) @PathVariable("id") pointId: Int): ApiResponseVO<PointVO> {
+        val sPoint = sPointService.findPoint(pointId)
+        return ApiResponseVO(0, "Success", PointVO(
+                pointId = sPoint.id!!,
+                name = sPoint.name!!,
+                description = sPoint.description!!,
+                location = LocationBean("WGS-84", sPoint.location!!.y, sPoint.location!!.x),
+                userId = sPoint.user!!.id!!,
+                timestamp = sPoint.timestamp!!.toEpochMilli(),
+                like = sPoint.like!!,
+                images = sPoint.images!!.map { it.id!! },
+                associatedTrack = sPoint.associatedTrack?.id
+        ))
+    }
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除点")
@@ -53,8 +66,10 @@ class SPointController @Autowired constructor(
 
     @GetMapping("/around")
     @ApiOperation("获取附近点")
-    fun getSPointAround(@RequestBody location: LocationBean): ApiResponseVO<List<PointVO>> {
-        return ApiResponseVO(0, "Success", sPointService.findAllStandaloneSPointAround(location, 1.0).map {
+    fun getSPointAround(@RequestParam coordinateType: String, @RequestParam latitude: Double, @RequestParam longitude: Double): ApiResponseVO<List<PointVO>> {
+        return ApiResponseVO(0, "Success", sPointService.findAllStandaloneSPointAround(LocationBean(
+                coordinateType, latitude, longitude
+        ), 1.0).map {
             PointVO(
                     pointId = it.id!!,
                     name = it.name!!,

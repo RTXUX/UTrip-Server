@@ -36,7 +36,7 @@ class ImageServiceImpl @Autowired constructor(
         }
 
         fun createUploadPolicy(id: Int, key: String, bucket: String): StringMap = StringMap().apply {
-            put("scope", bucket)
+            put("scope", "${bucket}:${key}")
             put("callbackUrl", CALLBACK_URL)
             put("callbackBody", jacksonObjectMapper().writeValueAsString(ImageUploadCallbackDTO(
                     name = "$(fname)",
@@ -67,7 +67,7 @@ class ImageServiceImpl @Autowired constructor(
                 timestamp = Instant.now(),
                 user = user
         ))
-        val uploadPolicy = UploadUtils.createUploadPolicy(image.id!!, key, qiniuConfig.bucket)
+        val uploadPolicy = createUploadPolicy(image.id!!, key, qiniuConfig.bucket)
         val token = qiniuAuth.uploadToken(qiniuConfig.bucket, key, expiration.toSeconds(), uploadPolicy)
         return ImagePreUploadVO(
                 id = image.id!!,

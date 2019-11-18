@@ -1,5 +1,6 @@
 package xyz.rtxux.utrip.server.config
 
+import com.qiniu.util.Auth
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,11 +11,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import org.springframework.stereotype.Component
+import org.springframework.web.filter.GenericFilterBean
+import xyz.rtxux.utrip.server.service.impl.ImageServiceImpl
 import xyz.rtxux.utrip.server.service.impl.UserDetailsServiceImpl
+import javax.servlet.FilterChain
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -28,6 +37,7 @@ import javax.servlet.http.HttpServletResponse
 class SecurityConfig @Autowired constructor(
         private val userDetailsService: UserDetailsServiceImpl,
         private val myAuthenticationSuccessHandler: MyAuthenticationSuccessHandler
+        //private val qiniuCallbackAuthenticationFilter: QiniuCallbackAuthenticationFilter
 ) : WebSecurityConfigurerAdapter() {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
@@ -45,6 +55,7 @@ class SecurityConfig @Autowired constructor(
             this.successHandler(myAuthenticationSuccessHandler)
             this.permitAll()
         }
+        //http?.addFilterBefore(qiniuCallbackAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         http?.csrf()?.disable()
     }
 
@@ -66,5 +77,25 @@ class MyAuthenticationSuccessHandler : SavedRequestAwareAuthenticationSuccessHan
             return
         }
         response!!.sendRedirect("/auth/validate")
+    }
+}
+
+//@Component
+class QiniuCallbackAuthenticationFilter @Autowired constructor(
+        private val qiniuAuth: Auth,
+        private val qiniuConfig: QiniuConfig
+) : GenericFilterBean() {
+    override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
+        val httpRequest = request!! as HttpServletRequest
+        if (httpRequest.requestURL.toString() != ImageServiceImpl.UploadUtils.CALLBACK_URL) {
+            chain?.doFilter(request, response)
+            return
+        }
+        val authorization = httpRequest.getHeader("Authorization")
+        val valid = qiniuAuth.isValidCallback(authorization, ImageServiceImpl.UploadUtils.CALLBACK_URL, httpRequest.inputStream.readAllBytes(), httpRequest.contentType)
+        if (valid) {
+            SecurityContextHolder.getContext().authentication = PreAuthenticatedAuthenticationToken("Qiniu", null, listOf(SimpleGrantedAuthority("QINIU")))
+        }
+        chain?.doFilter(request, response)
     }
 }

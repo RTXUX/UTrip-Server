@@ -9,4 +9,6 @@ interface SPointService {
     fun findAllStandaloneSPointAround(location: LocationBean, radius: Double): List<SPoint>
 
     fun saveSPoint(pointDTO: PointDTO, user: User): SPoint
+
+    fun findPoint(pointId: Int): SPoint
 }

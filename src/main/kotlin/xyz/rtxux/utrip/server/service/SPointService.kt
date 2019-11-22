@@ -11,4 +11,8 @@ interface SPointService {
     fun saveSPoint(pointDTO: PointDTO, user: User): SPoint
 
     fun findPoint(pointId: Int): SPoint
+
+    fun deleteSPoint(pointId: Int, user: User)
+
+    fun findPointByUser(user: User): List<SPoint>
 }

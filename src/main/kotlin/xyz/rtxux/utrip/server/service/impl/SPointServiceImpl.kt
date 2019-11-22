@@ -15,7 +15,6 @@ import xyz.rtxux.utrip.server.repository.ImageRepository
 import xyz.rtxux.utrip.server.repository.SPointRepository
 import xyz.rtxux.utrip.server.repository.TrackRepository
 import xyz.rtxux.utrip.server.service.SPointService
-import xyz.rtxux.utrip.server.utils.GeometryUtils
 import java.time.Instant
 import javax.persistence.EntityManager
 
@@ -32,7 +31,9 @@ class SPointServiceImpl @Autowired constructor(
 //        val query = entityManager.createQuery("select p from SPoint p where within(p.location, :filter) = true", SPoint::class.java)
 //        query.setParameter("filter", filter)
 //        return query.resultList
-        return sPointRepository.findAllStandalonePointAround(GeometryUtils.createCircle(location, radius))
+        //return sPointRepository.findAllStandalonePointAround(GeometryUtils.createCircle(location, radius))
+        val point = GeometryFactory(PrecisionModel(), 4326).createPoint(Coordinate(location.longitude, location.latitude))
+        return sPointRepository.findAllStandalonePointAround(point, radius)
     }
 
     @Transactional
@@ -69,5 +70,18 @@ class SPointServiceImpl @Autowired constructor(
     @Transactional(readOnly = true)
     override fun findPoint(pointId: Int): SPoint {
         return sPointRepository.findById(pointId).orElseThrow { AppException(404, 2003, "未找到点") }
+    }
+
+    @Transactional
+    override fun deleteSPoint(pointId: Int, user: User) {
+        val point = sPointRepository.findById(pointId).orElseThrow { AppException(404, 3003, "点不存在") }
+        if (point.user!!.id!! != user.id!!) {
+            throw AppException(403, 2002, "未授权的操作")
+        }
+        sPointRepository.delete(point)
+    }
+
+    override fun findPointByUser(user: User): List<SPoint> {
+        return sPointRepository.findAllByUserAndAssociatedTrackIsNull(user)
     }
 }

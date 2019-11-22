@@ -15,6 +15,7 @@ import xyz.rtxux.utrip.server.model.vo.PointVO
 import xyz.rtxux.utrip.server.repository.UserRepsitory
 import xyz.rtxux.utrip.server.service.SPointService
 import xyz.rtxux.utrip.server.service.impl.MyUserDetails
+import xyz.rtxux.utrip.server.utils.Empty
 
 
 @RestController
@@ -62,14 +63,18 @@ class SPointController @Autowired constructor(
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除点")
-    fun deleteSPoint(@ApiParam("点ID", example = "1", required = true) @PathVariable("id") pointId: Int): ApiResponseVO<Unit>? = null
+    fun deleteSPoint(@ApiParam("点ID", example = "1", required = true) @PathVariable("id") pointId: Int, @ApiIgnore @AuthenticationPrincipal userDetails: MyUserDetails): ApiResponseVO<Any> {
+        val user = userRepsitory.findById(userDetails.userId).orElseThrow { AppException(401, 1002, "用户不存在") }
+        sPointService.deleteSPoint(pointId, user)
+        return ApiResponseVO(0, "Success", Empty)
+    }
 
     @GetMapping("/around")
     @ApiOperation("获取附近点")
     fun getSPointAround(@RequestParam coordinateType: String, @RequestParam latitude: Double, @RequestParam longitude: Double): ApiResponseVO<List<PointVO>> {
         return ApiResponseVO(0, "Success", sPointService.findAllStandaloneSPointAround(LocationBean(
                 coordinateType, latitude, longitude
-        ), 1.0).map {
+        ), 5e3).map {
             PointVO(
                     pointId = it.id!!,
                     name = it.name!!,
@@ -87,4 +92,23 @@ class SPointController @Autowired constructor(
     @PostMapping("/{id}")
     @ApiOperation("修改点信息")
     fun modifyPoint(@ApiParam("点ID", example = "1", required = true) @PathVariable("id") pointId: Int, @RequestBody pointDTO: PointDTO): ApiResponseVO<PointVO>? = null
+
+    @GetMapping("")
+    fun findByUser(@RequestParam("userId") userId: Int): ApiResponseVO<List<PointVO>> {
+        val user = userRepsitory.findById(userId).orElseThrow { AppException(404, 1003, "用户不存在") }
+        return ApiResponseVO(0, "Success", sPointService.findPointByUser(user).map {
+            PointVO(
+                    pointId = it.id!!,
+                    name = it.name!!,
+                    description = it.description!!,
+                    location = LocationBean("WGS-84", it.location!!.y, it.location!!.x),
+                    userId = it.user!!.id!!,
+                    timestamp = it.timestamp!!.toEpochMilli(),
+                    like = it.like!!,
+                    images = it.images!!.map { it.id!! },
+                    associatedTrack = null
+            )
+        })
+    }
+
 }

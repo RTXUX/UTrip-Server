@@ -1,6 +1,7 @@
 package xyz.rtxux.utrip.server.model.po
 
 import org.locationtech.jts.geom.Point
+import xyz.rtxux.utrip.server.model.vo.UserProfileVO
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
@@ -36,4 +37,12 @@ data class User(
         var gender: String? = null,
         @OneToMany(mappedBy = "user")
         var images: List<Image>? = null
-)
+) {
+    fun toUserProfileVO(): UserProfileVO = UserProfileVO(
+            userId = id!!,
+            username = username!!,
+            nickname = nickname ?: "",
+            gender = gender!!,
+            avatarUrl = avatarUrl ?: ""
+    )
+}

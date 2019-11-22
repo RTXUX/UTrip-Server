@@ -35,6 +35,6 @@ data class SPoint(
         var location: Point? = null,
         @ManyToOne(fetch = FetchType.EAGER)
         var associatedTrack: Track? = null,
-        @OneToMany(mappedBy = "point", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "point", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
         var images: List<Image>? = null
 )

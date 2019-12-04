@@ -1,5 +1,9 @@
 package xyz.rtxux.utrip.server.model.po
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import org.hibernate.annotations.TypeDefs
 import org.locationtech.jts.geom.Point
 import xyz.rtxux.utrip.server.model.vo.UserProfileVO
 import javax.persistence.*
@@ -11,6 +15,7 @@ import javax.validation.constraints.NotBlank
         UniqueConstraint(name = "phone_number", columnNames = arrayOf("phoneNumber")),
         UniqueConstraint(name = "email", columnNames = arrayOf("email"))
 ))
+@TypeDefs(TypeDef(name = "jsonb", typeClass = JsonBinaryType::class))
 data class User(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,13 +41,26 @@ data class User(
         @Column(nullable = false)
         var gender: String? = null,
         @OneToMany(mappedBy = "user")
-        var images: List<Image>? = null
+        var images: List<Image>? = null,
+        @Type(type = "jsonb")
+        @Column(columnDefinition = "jsonb")
+        var userProfile: UserProfileWrapper? = null
 ) {
     fun toUserProfileVO(): UserProfileVO = UserProfileVO(
             userId = id!!,
             username = username!!,
-            nickname = nickname ?: "",
+            nickname = nickname ?: username!!,
             gender = gender!!,
             avatarUrl = avatarUrl ?: ""
     )
 }
+
+data class UserProfileEntry(
+        val key: String,
+        var hidden: Boolean = true,
+        var value: String? = null
+)
+
+data class UserProfileWrapper(
+        val userProfile: MutableMap<String, UserProfileEntry>
+)

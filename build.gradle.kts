@@ -1,16 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "2.2.0.RELEASE"
+    id("idea")
+    id("org.springframework.boot") version "2.2.1.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
-    kotlin("jvm") version "1.3.60"
-    kotlin("plugin.spring") version "1.3.60"
-    kotlin("plugin.jpa") version "1.3.60"
+    kotlin("jvm") version "1.3.61"
+    kotlin("plugin.spring") version "1.3.61"
+    kotlin("plugin.jpa") version "1.3.61"
 }
 
 group = "xyz.rtxux.utrip"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_13
 
 val developmentOnly by configurations.creating
 configurations {
@@ -45,12 +46,14 @@ dependencies {
         this.exclude("com.alibaba", "tools")
     }
     implementation("com.qiniu:qiniu-java-sdk:7.2.27")
+    implementation("com.vladmihalcea:hibernate-types-52:2.7.1")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
+
     testImplementation("org.springframework.security:spring-security-test")
 }
 
@@ -61,6 +64,6 @@ tasks.withType<Test> {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "1.8"
+        jvmTarget = "12"
     }
 }

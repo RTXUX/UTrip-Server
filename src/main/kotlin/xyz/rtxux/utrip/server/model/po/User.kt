@@ -5,7 +5,6 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import org.locationtech.jts.geom.Point
-import xyz.rtxux.utrip.server.model.vo.UserProfileVO
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
@@ -44,23 +43,6 @@ data class User(
         var images: List<Image>? = null,
         @Type(type = "jsonb")
         @Column(columnDefinition = "jsonb")
-        var userProfile: UserProfileWrapper? = null
+        var userProfile: UserProfile? = null
 ) {
-    fun toUserProfileVO(): UserProfileVO = UserProfileVO(
-            userId = id!!,
-            username = username!!,
-            nickname = nickname ?: username!!,
-            gender = gender!!,
-            avatarUrl = avatarUrl ?: ""
-    )
 }
-
-data class UserProfileEntry(
-        val key: String,
-        var hidden: Boolean = true,
-        var value: String? = null
-)
-
-data class UserProfileWrapper(
-        val userProfile: MutableMap<String, UserProfileEntry>
-)
